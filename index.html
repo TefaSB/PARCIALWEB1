@@ -1,1 +1,131 @@
-<h1>Hello word</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicaciones Web - Ejercicio</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        #equation { text-align: center; margin: 20px; }
+        #results { text-align: center; margin: 20px; }
+        table { margin: 0 auto; }
+    </style>
+</head>
+<body>
+<h1>Ejercicio Aplicaciones Web</h1>
+<p>Nombre: STEFANIA BOTELLO MORALES - Código: 2016600</p>
+
+<div id="equation">
+    <img src="./img/fomula.png" alt="Ecuación con arcoseno, arcocoseno, raíces y logaritmos">
+</div>
+
+<button onclick="procesar()">Procesar</button>
+<div id="results">
+    <h2>Resultados:</h2>
+    <table id="errorTable">
+        <thead>
+        <tr>
+            <th>Tipo de Error</th>
+            <th>Total</th>
+            <th>Porcentaje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr><td>Errores de Arcoseno</td><td id="asinError">0</td><td id="asinPercent">0%</td></tr>
+        <tr><td>Errores de Arcocoseno</td><td id="acosError">0</td><td id="acosPercent">0%</td></tr>
+        <tr><td>Errores de Raíz Cuadrada</td><td id="sqrtError">0</td><td id="sqrtPercent">0%</td></tr>
+        <tr><td>Errores de División</td><td id="divError">0</td><td id="divPercent">0%</td></tr>
+        <tr><td>Errores de Logaritmo Natural</td><td id="logError">0</td><td id="logPercent">0%</td></tr>
+        </tbody>
+    </table>
+    <div id="chart_div"></div>
+</div>
+
+<script>
+    function procesar() {
+        let asinError = 0, acosError = 0, sqrtError = 0, divError = 0, logError = 0;
+
+        // 1000 ciclos con valores al azar entre -1 y 1
+        for (let i = 0; i < 1000; i++) {
+            // Valores generados aleatoriamente
+            let a = Math.random() * 2 - 1; 
+            let b = Math.random() * 2 - 1;
+            let c = Math.random() * 2 - 1; // Rango [-1, 1]
+            let d = Math.random() * 2 - 1;
+            let e = Math.random() * 2 - 1; 
+            let f = Math.random() * 2 - 1;
+            let g = Math.random() * 2 - 1;
+            let h = Math.random() * 2 - 1;
+            let i = Math.random() * 2 - 1;
+            let k = Math.random() * 2 - 1;
+            let p = Math.random() * 2 - 1; 
+            let u = Math.random() * 2 - 1;
+            let s = Math.random() * 2 - 1;
+            let t = Math.random() * 2 - 1;
+
+            // Comprobaciones manuales para errores de dominio
+            if (a - b < -1 || a - b > 1) acosError++; // Error en arccos
+            if (b * b - Math.sqrt(c - d) < -1 || b * b - Math.sqrt(c - d) > 1) asinError++; // Error en arcsin
+            if (Math.sqrt(s)/t < 0) sqrtError++; // Error en raíz cuadrada
+            if (c - d < 0) sqrtError++; // Error en raíz cuadrada
+            if (e === 0) {
+                divError++; // Error en división por 0
+            } else if (isNaN(d / e)) {
+                divError++; // Asegurarse de que la división no genera un NaN
+            }
+            if (p <= 0) logError++; // Error en logaritmo de valor no positivo
+
+            if (u - i <= 0) logError++; // Error en logaritmo de valor no positivo
+            if ((h - i) / k < -1 || (h - i) / k > 1) acosError++; // Error en arccos
+        }
+
+        // Totales y porcentajes
+        let totalErrores = asinError + acosError + sqrtError + divError + logError;
+        let porcentajes = {
+            asin: (totalErrores > 0 ? (asinError / totalErrores * 100).toFixed(2) : 0) + '%',
+            acos: (totalErrores > 0 ? (acosError / totalErrores * 100).toFixed(2) : 0) + '%',
+            sqrt: (totalErrores > 0 ? (sqrtError / totalErrores * 100).toFixed(2) : 0) + '%',
+            div: (totalErrores > 0 ? (divError / totalErrores * 100).toFixed(2) : 0) + '%',
+            log: (totalErrores > 0 ? (logError / totalErrores * 100).toFixed(2) : 0) + '%'
+        };
+
+        // Actualizar la tabla
+        document.getElementById('asinError').innerText = asinError;
+        document.getElementById('acosError').innerText = acosError;
+        document.getElementById('sqrtError').innerText = sqrtError;
+        document.getElementById('divError').innerText = divError;
+        document.getElementById('logError').innerText = logError;
+        document.getElementById('asinPercent').innerText = porcentajes.asin;
+        document.getElementById('acosPercent').innerText = porcentajes.acos;
+        document.getElementById('sqrtPercent').innerText = porcentajes.sqrt;
+        document.getElementById('divPercent').innerText = porcentajes.div;
+        document.getElementById('logPercent').innerText = porcentajes.log;
+
+        // Mostrar gráfico de pastel
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Tipo de Error', 'Total'],
+                ['Errores de Arcoseno', asinError],
+                ['Errores de Arcocoseno', acosError],
+                ['Errores de Raíz Cuadrada', sqrtError],
+                ['Errores de División', divError],
+                ['Errores de Logaritmo Natural', logError]
+            ]);
+
+            var options = {
+                title: 'Distribución de Errores',
+                pieHole: 0.4,
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+    }
+</script>
+</body>
+</html>
